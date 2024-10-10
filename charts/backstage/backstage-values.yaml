@@ -203,13 +203,13 @@ upstream:
         publisher:
           type: 'awsS3'
           awsS3:
-            bucketName: {{ ocp4_workload_redhat_developer_hub_s3_bucket_name }}
-            region: {{ ocp4_workload_redhat_developer_hub_s3_bucket_region }}
-            endpoint: {{ ocp4_workload_redhat_developer_hub_s3_bucket_endpoint }}
+            bucketName: {{ ocp4_workload_redhat_developer_hub_minio_bucket_name }}
+            region: us-east-2
+            endpoint: {{ ocp4_workload_redhat_developer_hub_minio_endpoint }}
             s3ForcePathStyle: true
             credentials:
-              accessKeyId: {{ ocp4_workload_redhat_developer_hub_s3_bucket_aws_access_key_id }}
-              secretAccessKey: {{ ocp4_workload_redhat_developer_hub_s3_bucket_aws_secret_access_key }}
+              accessKeyId: {{ ocp4_workload_redhat_developer_hub_minio_username }}
+              secretAccessKey: {{ ocp4_workload_redhat_developer_hub_minio_password }}
 
       auth:
         environment: production
