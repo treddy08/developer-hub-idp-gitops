@@ -276,7 +276,7 @@ upstream:
         environment: production
         providers:
           oauth2Proxy: {}
-{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
+{% if ocp4_workload_trusted_application_pipeline_orchestrator_enabled %}
         externalAccess:
           - type: static
             options:
