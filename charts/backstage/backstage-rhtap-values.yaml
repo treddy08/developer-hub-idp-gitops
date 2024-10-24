@@ -210,7 +210,6 @@ upstream:
 {% if ocp4_workload_trusted_application_pipeline_orchestrator_enabled %}
           script-src: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
           script-src-elem: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-          script-src-elem: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
 {% endif %}
           connect-src: ["'self'", 'http:', 'https:']
         cors:
