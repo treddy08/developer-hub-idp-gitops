@@ -2,6 +2,11 @@
 #helm repo update
 #oc project backstage
 #helm install backstage backstage/backstage --values values.yaml
+{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled is defined %}
+    {% set orchestrator_enabled = ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
+{% else %}
+    {% set orchestrator_enabled = true %}
+{% endif %}
 global:
   auth:
     backend:
@@ -67,7 +72,7 @@ global:
         disabled: false
       - package:  ./dynamic-plugins/dist/backstage-community-plugin-redhat-argocd
         disabled: false
-{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
+{% if orchestrator_enabled %}
       - disabled: false
         package: "@redhat/backstage-plugin-orchestrator-backend-dynamic@1.2.0"
         integrity: sha512-lyw7IHuXsakTa5Pok8S2GK0imqrmXe3z+TcL7eB2sJYFqQPkCP5la1vqteL9/1EaI5eI6nKZ60WVRkPEldKBTg==
@@ -207,7 +212,7 @@ upstream:
           port: 7007
           host: 0.0.0.0
         csp:
-{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
+{% if orchestrator_enabled %}
           script-src: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
           script-src-elem: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
 {% endif %}
@@ -275,7 +280,7 @@ upstream:
         environment: production
         providers:
           oauth2Proxy: {}
-{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
+{% if orchestrator_enabled %}
         externalAccess:
           - type: static
             options:
