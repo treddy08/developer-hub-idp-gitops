@@ -2,7 +2,7 @@
 #helm repo update
 #oc project backstage
 #helm install backstage backstage/backstage --values values.yaml
-{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled is not none %}
+{% if ocp4_workload_redhat_developer_hub_orchestrator_enabled is defined %}
     {% set orchestrator_enabled = ocp4_workload_redhat_developer_hub_orchestrator_enabled %}
 {% else %}
     {% set orchestrator_enabled = true %}
