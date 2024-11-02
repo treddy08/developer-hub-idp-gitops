@@ -8,9 +8,6 @@
     {% set orchestrator_enabled = true %}
 {% endif %}
 
-orchestrator:
-  token: "{{ '{{ randAlphaNum 24 }}' }}"
-
 global:
   auth:
     backend:
