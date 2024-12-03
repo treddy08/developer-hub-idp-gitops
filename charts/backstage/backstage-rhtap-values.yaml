@@ -283,7 +283,7 @@ upstream:
       jenkins:
         instances:
           - name: default
-            baseUrl: http://jenkins.jenkins.svc
+            baseUrl: {{ ocp4_workload_trusted_application_pipeline_jenkins_url }}
             username: admin
             apiKey: {{ ocp4_workload_trusted_application_pipeline_jenkins_token }}
 
