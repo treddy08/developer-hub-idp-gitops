@@ -276,6 +276,13 @@ upstream:
         # The UI url for Quay, used to generate the link to Quay
         uiUrl: 'https://{{ ocp4_workload_trusted_application_pipeline_quay_host }}'
 
+      jenkins:
+        instances:
+          - name: default
+            baseUrl: http://jenkins.jenkins.svc
+            username: admin
+            apiKey: {{ ocp4_workload_trusted_application_pipeline_jenkins_token }}
+
       techdocs:
         builder: 'external'
         generator:
