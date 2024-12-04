@@ -7,6 +7,11 @@
 {% else %}
     {% set orchestrator_enabled = true %}
 {% endif %}
+{% if ocp4_workload_trusted_application_pipeline_jenkins_enabled is defined %}
+    {% set jenkins_enabled = ocp4_workload_trusted_application_pipeline_jenkins_enabled %}
+{% else %}
+    {% set jenkins_enabled = false %}
+{% endif %}
 
 global:
   auth:
@@ -49,10 +54,12 @@ global:
         disabled: false
       - package: ./dynamic-plugins/dist/backstage-plugin-techdocs-backend-dynamic
         disabled: false
+{% if jenkins_enabled %}
       - package: ./dynamic-plugins/dist/backstage-plugin-jenkins-backend-dynamic
         disabled: false
       - package: ./dynamic-plugins/dist/backstage-plugin-jenkins
         disabled: false
+{% endif %}
       - package: ./dynamic-plugins/dist/backstage-plugin-techdocs
         disabled: false        
       - package: ./dynamic-plugins/dist/janus-idp-backstage-plugin-tekton
@@ -279,13 +286,15 @@ upstream:
       quay:
         # The UI url for Quay, used to generate the link to Quay
         uiUrl: 'https://{{ ocp4_workload_trusted_application_pipeline_quay_host }}'
-
+        
+{% if jenkins_enabled %}
       jenkins:
         instances:
           - name: default
             baseUrl: {{ ocp4_workload_trusted_application_pipeline_jenkins_host }}
             username: admin
             apiKey: {{ ocp4_workload_trusted_application_pipeline_jenkins_token }}
+{% endif %}
 
       techdocs:
         builder: 'external'
@@ -386,7 +395,11 @@ upstream:
         github: false
         githubOrg: false
         gitlab: true
+{% if jenkins_enabled %}
         jenkins: true
+{% else %}
+        jenkins: false
+{% endif %}
         permission: false
 
   postgresql:
