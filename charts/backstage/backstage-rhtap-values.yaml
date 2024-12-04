@@ -61,7 +61,7 @@ global:
         disabled: false
 {% endif %}
       - package: ./dynamic-plugins/dist/backstage-plugin-techdocs
-        disabled: false        
+        disabled: false
       - package: ./dynamic-plugins/dist/janus-idp-backstage-plugin-tekton
         pluginConfig:
           dynamicPlugins:
