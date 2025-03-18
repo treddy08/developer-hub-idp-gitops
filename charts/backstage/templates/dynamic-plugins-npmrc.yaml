@@ -1,7 +1,0 @@
-kind: Secret
-apiVersion: v1
-metadata:
-  name: dynamic-plugins-npmrc
-stringData:
-  .npmrc: registry=https://npm.registry.redhat.com
-type: Opaque
