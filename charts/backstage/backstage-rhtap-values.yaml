@@ -55,9 +55,9 @@ global:
       - package: ./dynamic-plugins/dist/backstage-plugin-techdocs-backend-dynamic
         disabled: false
 {% if jenkins_enabled %}
-      - package: ./dynamic-plugins/dist/backstage-plugin-jenkins-backend-dynamic
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins-backend-dynamic
         disabled: false
-      - package: ./dynamic-plugins/dist/backstage-plugin-jenkins
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins
         disabled: false
 {% endif %}
       - package: ./dynamic-plugins/dist/backstage-plugin-techdocs
