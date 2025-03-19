@@ -23,6 +23,8 @@ spec:
 
                 COUNTER=$(($POD_COUNT - 1))
 
+                STUCK_POD_COUNT=0
+
                 for i in $(seq 0 $COUNTER);
 
                 do
@@ -43,11 +45,18 @@ spec:
 
                         echo "Container log grep: $CONTAINER_LOG_GREP"
 
-                        if [[ ! -z "${CONTAINER_LOG_GREP}" ]]; then
+                        if [[ ! -z "${CONTAINER_LOG_GREP// }" ]]; then
 
                           echo "Deleting lock file from install-dynamic-plugins container"
 
                           oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
+
+                          break
+
+                        else
+
+                          STUCK_POD_COUNT=$(($STUCK_POD_COUNT + 1))
+
                         fi
 
                       fi
@@ -56,6 +65,10 @@ spec:
 
                 done
 
+                if [[ "${STUCK_POD_COUNT}" == "${POD_COUNT}" ]]; then
 
+                  oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
+
+                fi
           restartPolicy: Never
           serviceAccountName: job-runner
