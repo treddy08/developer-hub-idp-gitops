@@ -27,8 +27,6 @@ spec:
 
                 do
 
-                    echo $i
-
                     POD=$(oc get pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name=developer-hub -o jsonpath='{.items['"$i"'].metadata.name}' || true)
 
                     echo "Found pod $POD"
