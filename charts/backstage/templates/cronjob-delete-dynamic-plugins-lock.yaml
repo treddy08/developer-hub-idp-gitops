@@ -39,6 +39,8 @@ spec:
 
                     if [[ "$LINE_COUNT" -eq 0 || ( "$LINE_COUNT" -lt 2 && ! -z "${CONTAINER_LOG_GREP// }")  ]]; then
 
+                      echo "Deleting lock file..."
+
                       oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
 
                     else
@@ -54,5 +56,7 @@ spec:
                   fi
 
                 fi
+
+                echo "Done!"
           restartPolicy: Never
           serviceAccountName: job-runner
