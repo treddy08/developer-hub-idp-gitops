@@ -19,56 +19,44 @@ spec:
             args:
               - '-ec'
               - >-
-                POD_COUNT=$(oc get deploy/backstage-developer-hub -n backstage -o jsonpath={.status.availableReplicas})
+                POD=$(oc get pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name=developer-hub -o jsonpath='{.items[0].metadata.name}' || true)
 
-                COUNTER=$(($POD_COUNT - 1))
+                echo "Found pod $POD"
 
-                STUCK_POD_COUNT=0
+                if [[ ! -z "${POD}" ]]; then
 
-                for i in $(seq 0 $COUNTER);
+                  POD_PHASE=$(oc get pod $POD -n {{ .Release.Namespace }} -o json | jq -r '.status.phase')
 
-                do
+                  echo "Pod $POD in phase $POD_PHASE"
 
-                    POD=$(oc get pod -n {{ .Release.Namespace }} -l app.kubernetes.io/name=developer-hub -o jsonpath='{.items['"$i"'].metadata.name}' || true)
+                  if [[ "${POD_PHASE}" == "Pending" ]]; then
 
-                    echo "Found pod $POD"
+                    oc logs $POD -n {{ .Release.Namespace }} -c install-dynamic-plugins --ignore-errors=true > /tmp/log.txt
 
-                    if [[ ! -z "${POD}" ]]; then
+                    CONTAINER_LOG_GREP=$(cat /tmp/log.txt | grep '======= Waiting for lock release...' || true)
 
-                      POD_PHASE=$(oc get pod $POD -n {{ .Release.Namespace }} -o json | jq -r '.status.phase')
+                    LINE_COUNT=$(</tmp/log.txt wc -l || echo 0)
 
-                      echo "Pod $POD in phase $POD_PHASE"
+                    if [[ "$LINE_COUNT" -eq 0 || ( "$LINE_COUNT" -lt 2 && ! -z "${CONTAINER_LOG_GREP// }")  ]]; then
 
-                      if [[ "${POD_PHASE}" == "Pending" ]]; then
+                      echo "Deleting lock file..."
 
-                        CONTAINER_LOG_GREP=$(oc logs $POD  -n {{ .Release.Namespace }} -c install-dynamic-plugins --ignore-errors=true | grep '======= Waiting for lock release...' || true)
+                      oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
 
-                        echo "Container log grep: $CONTAINER_LOG_GREP"
+                    else
 
-                        if [[ ! -z "${CONTAINER_LOG_GREP// }" ]]; then
-
-                          echo "Deleting lock file from install-dynamic-plugins container"
-
-                          oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
-
-                          break
-
-                        else
-
-                          STUCK_POD_COUNT=$(($STUCK_POD_COUNT + 1))
-
-                        fi
-
-                      fi
+                      echo "Line count and grep returned a false.  Nothing to do..."
 
                     fi
 
-                done
+                  else
 
-                if [[ "${STUCK_POD_COUNT}" == "${POD_COUNT}" ]]; then
+                    echo "Nothing to do..."
 
-                  oc exec -n {{ .Release.Namespace }} $POD -c install-dynamic-plugins -- rm -f /dynamic-plugins-root/install-dynamic-plugins.lock
+                  fi
 
                 fi
+
+                echo "Done!"
           restartPolicy: Never
           serviceAccountName: job-runner
