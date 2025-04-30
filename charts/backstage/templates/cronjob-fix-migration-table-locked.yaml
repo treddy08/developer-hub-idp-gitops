@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fix-migration-table-lock
+spec:
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Replace
+  schedule: "*/5 * * * *" 
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+          - name: fix-migration-table-lock
+            image: registry.redhat.io/openshift4/ose-tools-rhel9@sha256:8037187950e7374a9c9bec4996033c9b24ce374920ef29047d4f63b4c20f3e6b
+            command:
+              - /bin/bash
+            args:
+              - '-ec'
+              - |-
+                POD_NAME=$(oc get pod -l app.kubernetes.io/name=developer-hub -n backstage -o json | jq -r '.items[] | select(.status.containerStatuses[]?.state.waiting?.reason == "CrashLoopBackOff") | "\(.metadata.name)"' | head -n 1)
+
+                if [ ! -z $POD_NAME ]; then
+
+                  set +e
+
+                  oc logs $POD_NAME -c backstage-backend -n backstage | grep 'Migration table is already locked'
+
+                  EXIT_CODE=$?
+
+                  set -e        
+
+                  if [ $EXIT_CODE -eq 0 ]; then
+
+                    echo 'Migration table is locked.  Recreating developer hub...'
+
+                    oc get pvc -l app.kubernetes.io/name=postgresql -n backstage -o name | xargs -I {} oc patch {} -n backstage -p '{"metadata":{"finalizers":null}}'                  
+
+                    oc delete pvc -l app.kubernetes.io/name=postgresql -n backstage
+
+                    oc delete pod -l app.kubernetes.io/name=postgresql -n backstage
+
+                    oc delete pod -l app.kubernetes.io/name=developer-hub -n backstage                      
+
+                  else
+
+                    echo 'Migration table is not locked.  Exiting...'
+
+                  fi     
+
+                else
+
+                  echo 'No pods in CrashLoopBackOff.  Exiting...'
+
+                fi
+          restartPolicy: Never
+          serviceAccountName: job-runner
