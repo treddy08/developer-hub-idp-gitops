@@ -19,13 +19,13 @@ spec:
             args:
               - '-ec'
               - |-
-                POD_NAME=$(oc get pod -l app.kubernetes.io/name=developer-hub -n backstage -o json | jq -r '.items[] | select(.status.containerStatuses[]?.state.waiting?.reason == "CrashLoopBackOff") | "\(.metadata.name)"' | head -n 1)
+                POD_NAME=$(oc get pod -l app.kubernetes.io/name=developer-hub -n {{ .Release.Namespace }} -o json | jq -r '.items[] | select(.status.containerStatuses[]?.state.waiting?.reason == "CrashLoopBackOff") | "\(.metadata.name)"' | head -n 1)
 
                 if [ ! -z $POD_NAME ]; then
 
                   set +e
 
-                  oc logs $POD_NAME -c backstage-backend -n backstage | grep 'Migration table is already locked'
+                  oc logs $POD_NAME -c {{ .Release.Namespace }}-backend -n {{ .Release.Namespace }} | grep 'Migration table is already locked'
 
                   EXIT_CODE=$?
 
@@ -35,13 +35,13 @@ spec:
 
                     echo 'Migration table is locked.  Recreating developer hub...'
 
-                    oc get pvc -l app.kubernetes.io/name=postgresql -n backstage -o name | xargs -I {} oc patch {} -n backstage -p '{"metadata":{"finalizers":null}}'                  
+                    oc get pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} -o name | xargs -I {} oc patch {} -n {{ .Release.Namespace }} -p '{"metadata":{"finalizers":null}}'                  
 
-                    oc delete pvc -l app.kubernetes.io/name=postgresql -n backstage
+                    oc delete pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
 
-                    oc delete pod -l app.kubernetes.io/name=postgresql -n backstage
+                    oc delete pod -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
 
-                    oc delete pod -l app.kubernetes.io/name=developer-hub -n backstage                      
+                    oc delete pod -l app.kubernetes.io/name=developer-hub -n {{ .Release.Namespace }}                      
 
                   else
 
