@@ -32,6 +32,7 @@ global:
                       if:
                         allOf:
                           - isTektonCIAvailable
+        disabled: false
       - package: ./dynamic-plugins/dist/immobiliarelabs-backstage-plugin-gitlab-backend-dynamic
         disabled: false
       - package: ./dynamic-plugins/dist/immobiliarelabs-backstage-plugin-gitlab
