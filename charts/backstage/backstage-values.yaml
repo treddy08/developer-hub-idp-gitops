@@ -174,8 +174,11 @@ upstream:
       backend:
         baseUrl: https://{{ ocp4_workload_redhat_developer_hub_backstage_host }}
         auth:
-          keys:
-          - secret: ${BACKEND_SECRET}
+          externalAccess:
+          - type: static
+            options:
+              token: ${BACKEND_SECRET}
+              subject: orchestrator
         listen:
           port: 7007
           host: 0.0.0.0
@@ -239,6 +242,9 @@ upstream:
         environment: production
         providers:
           oauth2Proxy: {}
+        session:
+          secret:
+            $env: 'BACKEND_SECRET'
 
       signInPage: oauth2Proxy
 
