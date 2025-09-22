@@ -172,6 +172,7 @@ upstream:
       app:
         baseUrl: https://{{ ocp4_workload_redhat_developer_hub_backstage_host }}
       backend:
+        baseUrl: https://{{ ocp4_workload_redhat_developer_hub_backstage_host }}
         auth:
           keys:
           - secret: ${BACKEND_SECRET}
