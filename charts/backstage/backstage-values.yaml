@@ -58,6 +58,8 @@ global:
       - disabled: false
         package: ./dynamic-plugins/dist/backstage-community-plugin-ocm-backend-dynamic
       - disabled: false
+        package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar
+      - disabled: false
         integrity: sha512-9cXbedr0lC7ns7SNqARrWSQI4JGcZFw5xpfpUzA1tJaMMUjzAdPHTXqljf62/fs4hYBK8TJsWJ2KJkGVMzbrHQ==
         package: '@redhat/backstage-plugin-orchestrator-backend-dynamic@1.7.1'
         pluginConfig:
