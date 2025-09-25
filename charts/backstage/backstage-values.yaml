@@ -333,12 +333,12 @@ upstream:
   postgresql:
     auth:
       username: bn_backstage
-      password: {{ ocp4_workload_redhat_developer_hub_common_password }}
+      password: {{ ocp4_workload_redhat_developer_hub_users_password }}
       database: postgres
 
       # Admin user (superuser)
       postgresUser: postgres
-      postgresPassword: {{ ocp4_workload_redhat_developer_hub_common_password }}
+      postgresPassword: {{ ocp4_workload_redhat_developer_hub_users_password }}
 
   service:
     ports:
