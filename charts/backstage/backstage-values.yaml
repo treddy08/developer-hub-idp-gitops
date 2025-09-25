@@ -116,11 +116,11 @@ upstream:
         value: --no-node-snapshot
       - name: BACKEND_SECRET
         value: "{{ '{{ randAlphaNum 24 | b64enc }}' }}"
-      # - name: POSTGRES_ADMIN_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       key: postgres-password
-      #       name: backstage-postgresql
+      - name: POSTGRES_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: postgres-password
+            name: backstage-postgresql
       - name: NODE_TLS_REJECT_UNAUTHORIZED
         value: "0"
       - name: KEYCLOAK_CLIENT_ID
@@ -173,12 +173,6 @@ upstream:
         baseUrl: https://{{ ocp4_workload_redhat_developer_hub_backstage_host }}
       backend:
         baseUrl: https://{{ ocp4_workload_redhat_developer_hub_backstage_host }}
-        auth:
-          externalAccess:
-          - type: static
-            options:
-              token: ${BACKEND_SECRET}
-              subject: orchestrator
         listen:
           port: 7007
           host: 0.0.0.0
@@ -194,9 +188,10 @@ upstream:
         database:
           client: pg
           connection:
+            database: postgres
             host: "${POSTGRES_HOST}"
             port: "${POSTGRES_PORT}"
-            user: "${POSTGRES_USER}"
+            user: postgres
             password: "${POSTGRES_ADMIN_PASSWORD}"
         reading:
           allow:
@@ -335,36 +330,16 @@ upstream:
         jenkins: false
         permission: false
 
-  # postgresql:
-  #   enabled: true
-  #   database: backstage
-  #   postgresqlDataDir: /var/lib/pgsql/data/userdata
-  #   auth:
-  #     username: postgres
-  #     database: backstage
-  #     existingSecret: backstage-postgresql
-  #     secretKeys:
-  #       userPasswordKey: postgres-password
-  #   image:
-  #     registry: registry.redhat.io
-  #     repository: rhel9/postgresql-13
-  #     tag: 1-73
-  #   primary:
-  #     securityContext:
-  #       enabled: false
-  #     podSecurityContext:
-  #       enabled: false
-  #     containerSecurityContext:
-  #       enabled: false
-  #     persistence:
-  #       enabled: true
-  #       mountPath: /var/lib/pgsql/data
-  #     extraEnvVars:
-  #       - name: POSTGRESQL_ADMIN_PASSWORD
-  #         valueFrom:
-  #           secretKeyRef:
-  #             key: postgres-password
-  #             name: backstage-postgresql
+  postgresql:
+    auth:
+      username: bn_backstage
+      password: {{ ocp4_workload_redhat_developer_hub_common_password }}
+      database: postgres
+
+      # Admin user (superuser)
+      postgresUser: postgres
+      postgresPassword: {{ ocp4_workload_redhat_developer_hub_common_password }}
+
   service:
     ports:
       backend: 4180
@@ -410,57 +385,6 @@ orchestrator:
     initContainerImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
     # -- Image for the container used by the create-db job
     createDBJobImage: "{{ .Values.upstream.postgresql.image.registry }}/{{ .Values.upstream.postgresql.image.repository }}:{{ .Values.upstream.postgresql.image.tag }}"
-
-  # -- Orchestrator plugins and their configuration
-  plugins:
-    - disabled: false
-      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-backend-dynamic/-/backstage-plugin-orchestrator-backend-dynamic-1.7.1.tgz"
-      integrity: sha512-9cXbedr0lC7ns7SNqARrWSQI4JGcZFw5xpfpUzA1tJaMMUjzAdPHTXqljf62/fs4hYBK8TJsWJ2KJkGVMzbrHQ==
-      pluginConfig:
-        orchestrator:
-          dataIndexService:
-            url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
-    - disabled: false
-      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator/-/backstage-plugin-orchestrator-1.7.1.tgz"
-      integrity: sha512-Cqu9EQwVQ4mpdgWTUA0MW89Gul0IklhvkkqVoO3CloQ1dnAj1XyXikCphzH5TmNDDd9K66dOpaKKCaW9KeJ4WA==
-      pluginConfig:
-        dynamicPlugins:
-          frontend:
-            red-hat-developer-hub.backstage-plugin-orchestrator:
-              appIcons:
-                - name: orchestratorIcon
-                  importName: OrchestratorIcon
-              dynamicRoutes:
-                - path: /orchestrator
-                  importName: OrchestratorPage
-                  menuItem:
-                    icon: orchestratorIcon
-                    text: Orchestrator
-              entityTabs:
-                - path: /workflows
-                  title: Workflows
-                  mountPoint: entity.page.workflows
-              mountPoints:
-                - mountPoint: entity.page.workflows/cards
-                  importName: OrchestratorCatalogTab
-                  config:
-                    layout:
-                      gridColumn: "1 / -1"
-                    if:
-                      anyOf:
-                        - IsOrchestratorCatalogTabAvailable
-    - disabled: false
-      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic/-/backstage-plugin-scaffolder-backend-module-orchestrator-dynamic-1.7.1.tgz"
-      integrity: sha512-J1sTjA5kj6DphG8D65go9KlpIfKyLN/wq+XlY5Cb5djEo8mvF3wn3Haf60OGFo5cP4OfRSWqFwT7LM5/dNVwAg==
-      pluginConfig:
-        orchestrator:
-          dataIndexService:
-            url: http://sonataflow-platform-data-index-service.{{ .Release.Namespace }}
-    - disabled: false
-      package: "https://npm.registry.redhat.com/@redhat/backstage-plugin-orchestrator-form-widgets/-/backstage-plugin-orchestrator-form-widgets-1.7.1.tgz"
-      integrity: sha512-0KIXrZoJ+O4xNNzN/zB4+VMuaRPuiUviAmM+fIhTo/P9aLA36F9aIlyMbUbki49uaJ0zd8KXMBvmJSHZNrYkGQ==
-      pluginConfig:
-        dynamicPlugins:
-          frontend:
-            red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets: {}
 {% endraw %}
+  # -- Orchestrator plugins and their configuration
+  plugins: []
