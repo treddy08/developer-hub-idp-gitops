@@ -33,15 +33,21 @@ spec:
 
                   if [ $EXIT_CODE -eq 0 ]; then
 
-                    echo 'Migration table is locked.  Recreating developer hub...'
-
-                    oc delete pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
-
-                    oc get pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} -o name | xargs -I {} oc patch {} -n {{ .Release.Namespace }} -p '{"metadata":{"finalizers":null}}'                                      
-
+                    echo 'Migration table is locked.  Recreating developer hub...'                
+    
+                    oc delete pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} --wait=false
+    
+                    oc get pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} -o name | xargs -I {} oc patch {} -n {{ .Release.Namespace }} -p '{"metadata":{"finalizers":null}}'                  
+    
                     oc delete pod -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
-
-                    oc delete pod -l app.kubernetes.io/name=developer-hub -n {{ .Release.Namespace }}                      
+    
+                    oc delete pod -l app.kubernetes.io/name=developer-hub -n {{ .Release.Namespace }}
+    
+                    oc wait --for=condition=Ready pod -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} --timeout=300s              
+                    
+                    oc delete job backstage-create-sonataflow-database -n {{ .Release.Namespace }}
+    
+                    oc delete pod -l app=sonataflow-platform -n {{ .Release.Namespace }}                    
 
                   else
 
