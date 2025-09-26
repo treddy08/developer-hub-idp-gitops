@@ -47,7 +47,11 @@ spec:
                     
                     oc delete job backstage-create-sonataflow-database -n {{ .Release.Namespace }}
     
-                    oc delete pod -l app=sonataflow-platform -n {{ .Release.Namespace }}                    
+                    oc delete pod -l app=sonataflow-platform -n {{ .Release.Namespace }}        
+
+                    oc wait --for=condition=Ready pod -l app=sonataflow-platform -n default --timeout=300s
+
+                    oc delete pod -n default -l 'sonataflow.org/workflow-app'
 
                   else
 
