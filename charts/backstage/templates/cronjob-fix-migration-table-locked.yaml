@@ -35,9 +35,9 @@ spec:
 
                     echo 'Migration table is locked.  Recreating developer hub...'
 
-                    oc get pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} -o name | xargs -I {} oc patch {} -n {{ .Release.Namespace }} -p '{"metadata":{"finalizers":null}}'                  
-
                     oc delete pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
+
+                    oc get pvc -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }} -o name | xargs -I {} oc patch {} -n {{ .Release.Namespace }} -p '{"metadata":{"finalizers":null}}'                                      
 
                     oc delete pod -l app.kubernetes.io/name=postgresql -n {{ .Release.Namespace }}
 
