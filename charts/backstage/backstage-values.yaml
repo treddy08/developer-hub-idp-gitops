@@ -92,7 +92,6 @@ global:
           dynamicPlugins:
             frontend:
               red-hat-developer-hub.backstage-plugin-orchestrator-form-widgets: {}
-
       - disabled: false
         package: ./dynamic-plugins/dist/backstage-plugin-notifications
       - disabled: false
